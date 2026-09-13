@@ -2743,6 +2743,12 @@ export interface StravaActivity {
   type: string
   sport_type: string
   start_date: string
+  // Local time at the activity's location, no UTC offset suffix (e.g.
+  // "2026-09-15T20:30:00Z" is printed but represents local wall-clock
+  // time — Strava's documented quirk). Use this, not `start_date`, for
+  // calendar-day comparisons: `start_date` is UTC and would misfile an
+  // evening activity into the wrong day for anyone outside UTC.
+  start_date_local: string
   moving_time: number
   distance: number
   total_elevation_gain: number
@@ -2869,7 +2875,8 @@ describe('strava client', () => {
       ok: true,
       json: async () => [
         {
-          id: 1, name: 'Run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z',
+          id: 1, name: 'Run', type: 'Run', sport_type: 'Run',
+          start_date: '2026-09-15T06:00:00Z', start_date_local: '2026-09-15T07:00:00Z',
           moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96,
         },
       ],
@@ -3200,7 +3207,9 @@ export async function syncActivities(supabase: any, userId: string): Promise<Syn
   let matched = 0
 
   for (const activity of stravaActivities) {
-    const date = activity.start_date.slice(0, 10)
+    // start_date_local, not start_date: the latter is UTC and would file an
+    // evening activity under the wrong calendar day outside UTC.
+    const date = activity.start_date_local.slice(0, 10)
     const saved = await upsertStravaActivity(supabase, {
       stravaActivityId: activity.id,
       date,
@@ -3280,7 +3289,7 @@ describe('syncActivities', () => {
       ],
     })
     vi.mocked(stravaClient.fetchActivitiesSince).mockResolvedValue([
-      { id: 999, name: 'Morning run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z', moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96 },
+      { id: 999, name: 'Morning run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z', start_date_local: '2026-09-15T07:00:00Z', moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96 },
     ])
 
     const result = await syncActivities(supabase, 'u1')
@@ -3295,7 +3304,7 @@ describe('syncActivities', () => {
       ],
     })
     vi.mocked(stravaClient.fetchActivitiesSince).mockResolvedValue([
-      { id: 999, name: 'Morning run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z', moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96 },
+      { id: 999, name: 'Morning run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z', start_date_local: '2026-09-15T07:00:00Z', moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96 },
     ])
 
     const result = await syncActivities(supabase, 'u1')
@@ -3313,7 +3322,7 @@ describe('syncActivities', () => {
       ],
     })
     vi.mocked(stravaClient.fetchActivitiesSince).mockResolvedValue([
-      { id: 999, name: 'Morning run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z', moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96 },
+      { id: 999, name: 'Morning run', type: 'Run', sport_type: 'Run', start_date: '2026-09-15T06:00:00Z', start_date_local: '2026-09-15T07:00:00Z', moving_time: 2700, distance: 8000, total_elevation_gain: 150, average_speed: 2.96 },
     ])
 
     const result = await syncActivities(supabase, 'u1')
