@@ -61,4 +61,20 @@ describe('plans db', () => {
     await deletePhase(supabase, 'ph1')
     expect(await listPhases(supabase, 'p1')).toEqual([])
   })
+
+  it('upsertPhase generates a real id on create', async () => {
+    const supabase = createFakeSupabase()
+    const created = await upsertPhase(supabase, {
+      planId: 'p1', name: 'Base', startDate: '2026-09-01', endDate: '2026-12-31',
+      priorityDescription: null, targetLongRunMinKm: 10, targetLongRunMaxKm: 14,
+      targetWeeklyDplusMinM: 200, targetWeeklyDplusMaxM: 500, sortOrder: 1,
+    })
+    expect(typeof created.id).toBe('string')
+    expect(created.id.length).toBeGreaterThan(0)
+  })
+
+  it('updatePlan with nonexistent id throws an error', async () => {
+    const supabase = createFakeSupabase({ plans: [plan] })
+    await expect(updatePlan(supabase, 'nonexistent-id', { currentBenchmark: '8 km' })).rejects.toThrow()
+  })
 })

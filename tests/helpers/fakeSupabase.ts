@@ -19,14 +19,15 @@ export function createFakeSupabase(initial: Record<string, Row[]> = {}) {
 
     function currentResult(): { data: any; error: null } {
       if (pendingOp?.type === 'insert') {
-        const row = { id: crypto.randomUUID(), ...pendingOp.payload }
+        const payload = pendingOp.payload!
+        const row = { ...payload, id: payload.id ?? crypto.randomUUID() }
         tables[table].push(row)
         return { data: [row], error: null }
       }
       if (pendingOp?.type === 'upsert') {
         const payload = pendingOp.payload!
         const idx = tables[table].findIndex((r) => r.id === payload.id)
-        const row = { id: payload.id ?? crypto.randomUUID(), ...payload }
+        const row = { ...payload, id: payload.id ?? crypto.randomUUID() }
         if (idx >= 0) tables[table][idx] = { ...tables[table][idx], ...row }
         else tables[table].push(row)
         return { data: [tables[table].find((r) => r.id === row.id)], error: null }
@@ -86,7 +87,11 @@ export function createFakeSupabase(initial: Record<string, Row[]> = {}) {
       },
       single() {
         const { data, error } = currentResult()
-        return Promise.resolve({ data: data?.[0] ?? null, error })
+        if (error) return Promise.resolve({ data: null, error })
+        if (!data || data.length !== 1) {
+          return Promise.resolve({ data: null, error: { message: 'no rows found' } })
+        }
+        return Promise.resolve({ data: data[0], error: null })
       },
       then(resolve: any, reject: any) {
         return Promise.resolve(currentResult()).then(resolve, reject)
