@@ -61,6 +61,14 @@ export function createFakeSupabase(initial: Record<string, Row[]> = {}) {
         filters.push((r) => r[col] === val)
         return builder
       },
+      gte(col: string, val: any) {
+        filters.push((r) => r[col] >= val)
+        return builder
+      },
+      lte(col: string, val: any) {
+        filters.push((r) => r[col] <= val)
+        return builder
+      },
       order(col: string, opts: { ascending: boolean }) {
         orderBy = { col, ascending: opts.ascending }
         return builder
