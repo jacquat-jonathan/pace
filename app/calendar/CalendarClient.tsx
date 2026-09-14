@@ -5,10 +5,10 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import type { DateClickArg } from '@fullcalendar/interaction'
-import type { DatesSetArg, EventClickArg } from '@fullcalendar/core'
+import type { DatesSetArg, EventClickArg, EventDropArg } from '@fullcalendar/core'
 import type { PlannedSession } from '@/lib/types'
 import { mapSessionsToEvents } from '@/lib/calendar/mapSessionsToEvents'
-import { getSessionsForRange } from './actions'
+import { getSessionsForRange, moveSession } from './actions'
 import { SessionDialog, type SessionDialogState } from './SessionDialog'
 
 export function CalendarClient({ initialSessions }: { initialSessions: PlannedSession[] }) {
@@ -38,6 +38,19 @@ export function CalendarClient({ initialSessions }: { initialSessions: PlannedSe
     [sessions],
   )
 
+  const handleEventDrop = useCallback(
+    async (arg: EventDropArg) => {
+      const newDate = arg.event.startStr.slice(0, 10)
+      try {
+        await moveSession(arg.event.id, newDate)
+        if (range) refetch(range.start, range.end)
+      } catch {
+        arg.revert()
+      }
+    },
+    [range, refetch],
+  )
+
   const handleSaved = useCallback(() => {
     setDialog(null)
     if (range) refetch(range.start, range.end)
@@ -52,6 +65,8 @@ export function CalendarClient({ initialSessions }: { initialSessions: PlannedSe
         datesSet={handleDatesSet}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
+        eventDrop={handleEventDrop}
+        editable
         height="auto"
       />
       {dialog && <SessionDialog state={dialog} onClose={() => setDialog(null)} onSaved={handleSaved} />}
