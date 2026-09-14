@@ -54,7 +54,7 @@ export async function createSession(
     instructions: input.instructions,
     status: input.status ?? 'todo',
   }
-  const { data, error } = await supabase.from('planned_sessions').insert(row).single()
+  const { data, error } = await supabase.from('planned_sessions').insert(row).select().single()
   if (error) throw error
   return mapSession(data)
 }
@@ -78,7 +78,7 @@ export async function updateSession(
   if ('status' in patch) row.status = patch.status
   if ('linkedActivityId' in patch) row.linked_activity_id = patch.linkedActivityId
 
-  const { data, error } = await supabase.from('planned_sessions').update(row).eq('id', id).single()
+  const { data, error } = await supabase.from('planned_sessions').update(row).eq('id', id).select().single()
   if (error) throw error
   return mapSession(data)
 }

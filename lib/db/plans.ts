@@ -59,7 +59,7 @@ export async function updatePlan(
   if ('currentBenchmark' in patch) row.current_benchmark = patch.currentBenchmark
   if ('notes' in patch) row.notes = patch.notes
 
-  const { data, error } = await supabase.from('plans').update(row).eq('id', id).single()
+  const { data, error } = await supabase.from('plans').update(row).eq('id', id).select().single()
   if (error) throw error
   return mapPlan(data)
 }
@@ -91,7 +91,7 @@ export async function upsertPhase(
     target_weekly_dplus_max_m: phase.targetWeeklyDplusMaxM,
     sort_order: phase.sortOrder,
   }
-  const { data, error } = await supabase.from('plan_phases').upsert(row).single()
+  const { data, error } = await supabase.from('plan_phases').upsert(row).select().single()
   if (error) throw error
   return mapPhase(data)
 }
