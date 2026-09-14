@@ -821,7 +821,7 @@ export async function updatePlan(
   if ('currentBenchmark' in patch) row.current_benchmark = patch.currentBenchmark
   if ('notes' in patch) row.notes = patch.notes
 
-  const { data, error } = await supabase.from('plans').update(row).eq('id', id).single()
+  const { data, error } = await supabase.from('plans').update(row).eq('id', id).select().single()
   if (error) throw error
   return mapPlan(data)
 }
@@ -853,7 +853,7 @@ export async function upsertPhase(
     target_weekly_dplus_max_m: phase.targetWeeklyDplusMaxM,
     sort_order: phase.sortOrder,
   }
-  const { data, error } = await supabase.from('plan_phases').upsert(row).single()
+  const { data, error } = await supabase.from('plan_phases').upsert(row).select().single()
   if (error) throw error
   return mapPhase(data)
 }
@@ -1039,7 +1039,7 @@ export async function createSession(
     instructions: input.instructions,
     status: input.status ?? 'todo',
   }
-  const { data, error } = await supabase.from('planned_sessions').insert(row).single()
+  const { data, error } = await supabase.from('planned_sessions').insert(row).select().single()
   if (error) throw error
   return mapSession(data)
 }
@@ -1063,7 +1063,7 @@ export async function updateSession(
   if ('status' in patch) row.status = patch.status
   if ('linkedActivityId' in patch) row.linked_activity_id = patch.linkedActivityId
 
-  const { data, error } = await supabase.from('planned_sessions').update(row).eq('id', id).single()
+  const { data, error } = await supabase.from('planned_sessions').update(row).eq('id', id).select().single()
   if (error) throw error
   return mapSession(data)
 }
@@ -1266,7 +1266,7 @@ export async function createManualActivity(
     strava_link: null,
     planned_session_id: input.plannedSessionId,
   }
-  const { data, error } = await supabase.from('activities').insert(row).single()
+  const { data, error } = await supabase.from('activities').insert(row).select().single()
   if (error) throw error
   return mapActivity(data)
 }
@@ -1289,7 +1289,7 @@ export async function updateActivity(
   if ('dplusM' in patch) row.dplus_m = patch.dplusM
   if ('avgHr' in patch) row.avg_hr = patch.avgHr
 
-  const { data, error } = await supabase.from('activities').update(row).eq('id', id).single()
+  const { data, error } = await supabase.from('activities').update(row).eq('id', id).select().single()
   if (error) throw error
   return mapActivity(data)
 }
@@ -1336,7 +1336,7 @@ export async function upsertStravaActivity(
     strava_link: input.stravaLink,
     planned_session_id: existing?.planned_session_id ?? null,
   }
-  const { data, error } = await supabase.from('activities').upsert(row).single()
+  const { data, error } = await supabase.from('activities').upsert(row).select().single()
   if (error) throw error
   return mapActivity(data)
 }
@@ -2963,7 +2963,7 @@ export async function upsertStravaTokens(
     expires_at: tokens.expiresAt,
     last_synced_at: tokens.lastSyncedAt ?? existing?.last_synced_at ?? null,
   }
-  const { data, error } = await supabase.from('strava_tokens').upsert(row).single()
+  const { data, error } = await supabase.from('strava_tokens').upsert(row).select().single()
   if (error) throw error
   return mapTokens(data)
 }
