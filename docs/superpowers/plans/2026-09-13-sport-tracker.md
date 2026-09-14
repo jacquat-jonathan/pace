@@ -2187,7 +2187,7 @@ export function PlanClient({ plan, phases: initialPhases }: { plan: Plan; phases
     setPhases((prev) => [
       ...prev,
       {
-        id: `new-${prev.length}`,
+        id: `new-${crypto.randomUUID()}`,
         userId: plan.userId,
         planId: plan.id,
         name: '',
