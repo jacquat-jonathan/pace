@@ -49,6 +49,18 @@ describe('activities db', () => {
     expect(updated.distanceKm).toBe(8)
   })
 
+  it('updateActivity ignores core-metric fields on a strava-sourced row', async () => {
+    const supabase = createFakeSupabase({
+      activities: [{ ...baseActivity, id: 'a1', date: '2026-09-15', source: 'strava', distance_km: 8 }],
+    })
+    const updated = await updateActivity(supabase, 'a1', {
+      rpe: 7,
+      distanceKm: 999, // should be silently ignored
+    })
+    expect(updated.rpe).toBe(7)
+    expect(updated.distanceKm).toBe(8) // unchanged
+  })
+
   it('upsertStravaActivity inserts new, then updates same row on re-sync', async () => {
     const supabase = createFakeSupabase()
     const first = await upsertStravaActivity(supabase, {
