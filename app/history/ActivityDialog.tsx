@@ -1,8 +1,14 @@
 'use client'
 
-import { useTransition } from 'react'
-import type { Activity } from '@/lib/types'
-import { addManualActivity, saveActivityEdits } from './actions'
+import { useEffect, useState, useTransition } from 'react'
+import type { Activity, PlannedSession } from '@/lib/types'
+import {
+  addManualActivity,
+  saveActivityEdits,
+  fetchNearbySessions,
+  linkActivity,
+  unlinkActivityAction,
+} from './actions'
 
 export interface ActivityDialogState {
   mode: 'create' | 'edit'
@@ -27,6 +33,29 @@ export function ActivityDialog({
   const [isPending, startTransition] = useTransition()
   const a = state.activity
   const readOnly = state.mode === 'edit' && a?.source === 'strava'
+  const [nearbySessions, setNearbySessions] = useState<PlannedSession[]>([])
+
+  useEffect(() => {
+    if (state.mode === 'edit' && a && !a.plannedSessionId) {
+      fetchNearbySessions(a.date).then(setNearbySessions)
+    }
+  }, [state.mode, a])
+
+  function handleLink(sessionId: string) {
+    if (!a) return
+    startTransition(async () => {
+      await linkActivity(a.id, sessionId)
+      onSaved()
+    })
+  }
+
+  function handleUnlink() {
+    if (!a) return
+    startTransition(async () => {
+      await unlinkActivityAction(a.id)
+      onSaved()
+    })
+  }
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -99,6 +128,32 @@ export function ActivityDialog({
         </label>
         {readOnly && (
           <p className="text-xs text-gray-500">Core metrics come from Strava and can&apos;t be edited here.</p>
+        )}
+        {state.mode === 'edit' && a && (
+          <div className="rounded border p-2 text-sm">
+            {a.plannedSessionId ? (
+              <button type="button" onClick={handleUnlink} disabled={isPending} className="text-red-600">
+                Unlink from planned session
+              </button>
+            ) : nearbySessions.length > 0 ? (
+              <div className="flex flex-col gap-1">
+                <span>Link to a planned session:</span>
+                {nearbySessions.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => handleLink(s.id)}
+                    disabled={isPending}
+                    className="text-left text-blue-600 hover:underline"
+                  >
+                    {s.date} — {s.sessionName}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span className="text-gray-500">No nearby planned sessions to link.</span>
+            )}
+          </div>
         )}
         <div className="mt-2 flex justify-end gap-2">
           <button type="button" onClick={onClose} className="rounded border px-3 py-1 text-sm">
