@@ -9,6 +9,7 @@ export function createFakeSupabase(initial: Record<string, Row[]> = {}) {
     tables[table] ??= []
     const filters: Array<(r: Row) => boolean> = []
     let orderBy: { col: string; ascending: boolean } | null = null
+    let limitN: number | null = null
     let pendingOp:
       | null
       | { type: 'insert' | 'upsert' | 'update' | 'delete'; payload?: Row } = null
@@ -50,6 +51,7 @@ export function createFakeSupabase(initial: Record<string, Row[]> = {}) {
           return a[col] > b[col] ? dir : a[col] < b[col] ? -dir : 0
         })
       }
+      if (limitN != null) result = result.slice(0, limitN)
       return { data: result, error: null }
     }
 
@@ -69,8 +71,16 @@ export function createFakeSupabase(initial: Record<string, Row[]> = {}) {
         filters.push((r) => r[col] <= val)
         return builder
       },
+      lt(col: string, val: any) {
+        filters.push((r) => r[col] < val)
+        return builder
+      },
       order(col: string, opts: { ascending: boolean }) {
         orderBy = { col, ascending: opts.ascending }
+        return builder
+      },
+      limit(n: number) {
+        limitN = n
         return builder
       },
       insert(payload: Row) {
