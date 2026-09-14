@@ -1278,16 +1278,28 @@ export async function updateActivity(
     Pick<Activity, 'date' | 'sportType' | 'durationMin' | 'distanceKm' | 'dplusM' | 'avgHr'>
   >,
 ): Promise<Activity> {
+  // Strava-sourced core metrics are never user-editable, per the spec's
+  // global constraint — enforced here (not just in the UI) so every caller,
+  // present and future, gets the same guarantee regardless of what it passes.
+  const { data: existing, error: fetchError } = await supabase
+    .from('activities')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+  if (fetchError) throw fetchError
+
   const row: Record<string, any> = {}
   if ('rpe' in patch) row.rpe = patch.rpe
   if ('notes' in patch) row.notes = patch.notes
   if ('plannedSessionId' in patch) row.planned_session_id = patch.plannedSessionId
-  if ('date' in patch) row.date = patch.date
-  if ('sportType' in patch) row.sport_type = patch.sportType
-  if ('durationMin' in patch) row.duration_min = patch.durationMin
-  if ('distanceKm' in patch) row.distance_km = patch.distanceKm
-  if ('dplusM' in patch) row.dplus_m = patch.dplusM
-  if ('avgHr' in patch) row.avg_hr = patch.avgHr
+  if (existing?.source !== 'strava') {
+    if ('date' in patch) row.date = patch.date
+    if ('sportType' in patch) row.sport_type = patch.sportType
+    if ('durationMin' in patch) row.duration_min = patch.durationMin
+    if ('distanceKm' in patch) row.distance_km = patch.distanceKm
+    if ('dplusM' in patch) row.dplus_m = patch.dplusM
+    if ('avgHr' in patch) row.avg_hr = patch.avgHr
+  }
 
   const { data, error } = await supabase.from('activities').update(row).eq('id', id).select().single()
   if (error) throw error
