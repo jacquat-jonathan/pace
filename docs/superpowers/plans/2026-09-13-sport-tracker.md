@@ -3065,14 +3065,19 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/settings/strava?error=denied', request.url))
   }
 
-  const tokens = await exchangeCodeForToken(code)
-  const supabase = await createServerSupabase()
-  await upsertStravaTokens(supabase, {
-    athleteId: tokens.athleteId,
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    expiresAt: new Date(tokens.expiresAt * 1000).toISOString(),
-  })
+  try {
+    const tokens = await exchangeCodeForToken(code)
+    const supabase = await createServerSupabase()
+    await upsertStravaTokens(supabase, {
+      athleteId: tokens.athleteId,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresAt: new Date(tokens.expiresAt * 1000).toISOString(),
+    })
+  } catch (err) {
+    console.error('Strava OAuth callback failed:', err)
+    return NextResponse.redirect(new URL('/settings/strava?error=exchange_failed', request.url))
+  }
 
   return NextResponse.redirect(new URL('/settings/strava?connected=1', request.url))
 }
