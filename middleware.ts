@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           )
           response = NextResponse.next({ request: { headers: request.headers } })
@@ -28,9 +28,13 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const isLoginRoute = request.nextUrl.pathname.startsWith('/login')
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api')
+  // Only the cron route is exempt from the session check: it authenticates
+  // with its own CRON_SECRET bearer token instead. Everything else under
+  // /api (the Strava connect/callback pair) is user-facing and must be
+  // reachable only by the logged-in user.
+  const isCronRoute = request.nextUrl.pathname.startsWith('/api/cron')
 
-  if (!user && !isLoginRoute && !isApiRoute) {
+  if (!user && !isLoginRoute && !isCronRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
