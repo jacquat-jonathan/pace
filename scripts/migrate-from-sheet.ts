@@ -10,6 +10,24 @@ async function main() {
 
   const supabase = createAdminSupabase()
 
+  // This migration is a one-time import, but nothing stops it being run twice.
+  // A second run would insert a second active plan, and `getActivePlan`'s
+  // `.eq('status','active').maybeSingle()` errors outright on multiple rows —
+  // breaking /plan. Refuse to run rather than corrupt the invariant.
+  const { data: existingPlan, error: checkError } = await supabase
+    .from('plans')
+    .select('id')
+    .eq('status', 'active')
+    .maybeSingle()
+  if (checkError) throw checkError
+  if (existingPlan) {
+    console.error(
+      `An active plan already exists (id: ${existingPlan.id}). Aborting to avoid creating a duplicate. ` +
+        'Delete it in the Supabase Table Editor first if you intend to re-run this migration.',
+    )
+    process.exit(1)
+  }
+
   const { data: planRow, error: planError } = await supabase
     .from('plans')
     .insert({
