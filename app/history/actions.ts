@@ -29,7 +29,10 @@ export async function fetchNearbySessions(date: string) {
   const supabase = await createServerSupabase()
   const start = format(subDays(new Date(date), 3), 'yyyy-MM-dd')
   const end = format(addDays(new Date(date), 3), 'yyyy-MM-dd')
-  return listSessionsInRange(supabase, start, end)
+  const sessions = await listSessionsInRange(supabase, start, end)
+  // Never offer a session that some other activity already claims — linking
+  // to it would steal it away and leave the other activity dangling.
+  return sessions.filter((s) => !s.linkedActivityId)
 }
 
 export async function linkActivity(activityId: string, sessionId: string) {

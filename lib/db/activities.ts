@@ -154,6 +154,39 @@ export async function linkActivityToSession(
   activityId: string,
   sessionId: string,
 ): Promise<void> {
+  // Clear this activity's previous session link, if any, so the old session
+  // doesn't keep a stale linked_activity_id pointing at an activity that has
+  // since moved elsewhere.
+  const { data: activity, error: activityFetchError } = await supabase
+    .from('activities')
+    .select('*')
+    .eq('id', activityId)
+    .maybeSingle()
+  if (activityFetchError) throw activityFetchError
+  if (activity?.planned_session_id && activity.planned_session_id !== sessionId) {
+    const { error: staleSessionError } = await supabase
+      .from('planned_sessions')
+      .update({ linked_activity_id: null })
+      .eq('id', activity.planned_session_id)
+    if (staleSessionError) throw staleSessionError
+  }
+
+  // Clear the target session's previous activity link, if any, so two
+  // activities can never both claim to be linked to the same session.
+  const { data: session, error: sessionFetchError } = await supabase
+    .from('planned_sessions')
+    .select('*')
+    .eq('id', sessionId)
+    .maybeSingle()
+  if (sessionFetchError) throw sessionFetchError
+  if (session?.linked_activity_id && session.linked_activity_id !== activityId) {
+    const { error: staleActivityError } = await supabase
+      .from('activities')
+      .update({ planned_session_id: null })
+      .eq('id', session.linked_activity_id)
+    if (staleActivityError) throw staleActivityError
+  }
+
   const { error } = await supabase
     .from('activities')
     .update({ planned_session_id: sessionId })

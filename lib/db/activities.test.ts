@@ -104,6 +104,48 @@ describe('activities db', () => {
     expect(activity.plannedSessionId).toBe('s1')
   })
 
+  it('linkActivityToSession clears a prior activity when a session is relinked', async () => {
+    const supabase = createFakeSupabase({
+      activities: [
+        { ...baseActivity, id: 'a1', date: '2026-09-15' },
+        { ...baseActivity, id: 'a2', date: '2026-09-15' },
+      ],
+      planned_sessions: [
+        { id: 's1', user_id: 'u1', plan_id: 'p1', date: '2026-09-15', activity_type: 'running', session_name: 'Long run', priority: 'essential', target_duration_min: 45, target_distance_km: null, target_dplus_m: null, intensity: null, instructions: null, status: 'todo', linked_activity_id: null, created_at: '2026-09-01T00:00:00Z' },
+      ],
+    })
+
+    await linkActivityToSession(supabase, 'a1', 's1')
+    await linkActivityToSession(supabase, 'a2', 's1')
+
+    const activities = await listActivities(supabase)
+    const a1 = activities.find((a) => a.id === 'a1')!
+    const a2 = activities.find((a) => a.id === 'a2')!
+    // The session now belongs to a2 alone; a1 must have been released.
+    expect(a2.plannedSessionId).toBe('s1')
+    expect(a1.plannedSessionId).toBeNull()
+    expect(supabase._tables.planned_sessions[0].linked_activity_id).toBe('a2')
+  })
+
+  it('linkActivityToSession clears the previous session when an activity is relinked', async () => {
+    const supabase = createFakeSupabase({
+      activities: [{ ...baseActivity, id: 'a1', date: '2026-09-15' }],
+      planned_sessions: [
+        { id: 's1', user_id: 'u1', plan_id: 'p1', date: '2026-09-15', activity_type: 'running', session_name: 'Long run', priority: 'essential', target_duration_min: 45, target_distance_km: null, target_dplus_m: null, intensity: null, instructions: null, status: 'todo', linked_activity_id: null, created_at: '2026-09-01T00:00:00Z' },
+        { id: 's2', user_id: 'u1', plan_id: 'p1', date: '2026-09-16', activity_type: 'running', session_name: 'Easy run', priority: 'optional', target_duration_min: 30, target_distance_km: null, target_dplus_m: null, intensity: null, instructions: null, status: 'todo', linked_activity_id: null, created_at: '2026-09-01T00:00:00Z' },
+      ],
+    })
+
+    await linkActivityToSession(supabase, 'a1', 's1')
+    await linkActivityToSession(supabase, 'a1', 's2')
+
+    const [activity] = await listActivities(supabase)
+    expect(activity.plannedSessionId).toBe('s2')
+    const sessions = supabase._tables.planned_sessions
+    expect(sessions.find((s) => s.id === 's1')!.linked_activity_id).toBeNull()
+    expect(sessions.find((s) => s.id === 's2')!.linked_activity_id).toBe('a1')
+  })
+
   it('unlinkActivity clears both sides', async () => {
     const supabase = createFakeSupabase({
       activities: [{ ...baseActivity, id: 'a1', date: '2026-09-15', planned_session_id: 's1' }],
