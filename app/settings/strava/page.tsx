@@ -1,6 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getStravaTokens } from '@/lib/db/stravaTokens'
 import { disconnectStrava } from './actions'
+import { SyncNowButton } from './SyncNowButton'
 
 export default async function StravaSettingsPage() {
   const supabase = await createServerSupabase()
@@ -20,6 +21,7 @@ export default async function StravaSettingsPage() {
               Disconnect
             </button>
           </form>
+          <SyncNowButton />
         </div>
       ) : (
         <a href="/api/strava/connect" className="inline-block rounded bg-[#fc4c02] px-3 py-1 text-sm text-white">
