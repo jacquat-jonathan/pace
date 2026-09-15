@@ -18,7 +18,11 @@ export async function addManualActivity(input: Parameters<typeof createManualAct
   return result
 }
 
-export async function saveActivityEdits(id: string, patch: Parameters<typeof updateActivity>[2]) {
+// Exported so callers (ActivityDialog) can build the patch incrementally
+// against the real type instead of a `Record<string, unknown>` plus a cast.
+export type ActivityEditPatch = Parameters<typeof updateActivity>[2]
+
+export async function saveActivityEdits(id: string, patch: ActivityEditPatch) {
   const supabase = await createServerSupabase()
   const result = await updateActivity(supabase, id, patch)
   revalidatePath('/history')

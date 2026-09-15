@@ -16,13 +16,17 @@ export async function getSessionsForRange(start: string, end: string): Promise<P
   return listSessionsInRange(supabase, start, end)
 }
 
-export async function saveSession(
-  input: (Parameters<typeof createSession>[1] & { id?: undefined }) | ({ id: string } & Partial<Parameters<typeof createSession>[1]>),
-) {
+// A single non-union shape — every field `createSession` requires, plus an
+// optional `id` that selects update-vs-create. The union this replaced forced
+// callers (SessionDialog, which always passes `id: session?.id`) to cast,
+// because `id?: string` narrows to neither branch.
+export type SaveSessionInput = Parameters<typeof createSession>[1] & { id?: string }
+
+export async function saveSession(input: SaveSessionInput) {
   const supabase = await createServerSupabase()
-  const result = 'id' in input && input.id
+  const result = input.id
     ? await updateSession(supabase, input.id, input)
-    : await createSession(supabase, input as Parameters<typeof createSession>[1])
+    : await createSession(supabase, input)
   revalidatePath('/calendar')
   return result
 }

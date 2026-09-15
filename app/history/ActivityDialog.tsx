@@ -9,6 +9,7 @@ import {
   linkActivity,
   unlinkActivityAction,
 } from './actions'
+import type { ActivityEditPatch } from './actions'
 
 export interface ActivityDialogState {
   mode: 'create' | 'edit'
@@ -72,7 +73,7 @@ export function ActivityDialog({
           plannedSessionId: null,
         })
       } else if (a) {
-        const patch: Record<string, unknown> = {
+        const patch: ActivityEditPatch = {
           rpe: numberOrNull(formData.get('rpe')),
           notes: (formData.get('notes') as string) || null,
         }
@@ -84,7 +85,7 @@ export function ActivityDialog({
           patch.dplusM = numberOrNull(formData.get('dplusM'))
           patch.avgHr = numberOrNull(formData.get('avgHr'))
         }
-        await saveActivityEdits(a.id, patch as any)
+        await saveActivityEdits(a.id, patch)
       }
       onSaved()
     })

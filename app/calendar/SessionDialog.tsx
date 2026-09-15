@@ -42,7 +42,7 @@ export function SessionDialog({
         targetDplusM: numberOrNull(formData.get('targetDplusM')),
         intensity: (formData.get('intensity') as string) || null,
         instructions: (formData.get('instructions') as string) || null,
-      } as any)
+      })
       onSaved()
     })
   }
