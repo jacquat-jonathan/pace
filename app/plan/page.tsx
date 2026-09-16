@@ -6,7 +6,7 @@ export default async function PlanPage() {
   const supabase = await createServerSupabase()
   const plan = await getActivePlan(supabase)
   if (!plan) {
-    return <p>No active plan yet. Run the migration script (Task 21) or create one in Supabase.</p>
+    return <div className="page page-narrow"><div className="card empty-state"><div><strong>No active plan yet</strong><p>Create one in Supabase or run the migration script to get started.</p></div></div></div>
   }
   const phases = await listPhases(supabase, plan.id)
   return <PlanClient plan={plan} phases={phases} />

@@ -56,74 +56,37 @@ export function SessionDialog({
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="dialog-backdrop" onClick={onClose} role="presentation">
       <form
         action={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="flex w-96 flex-col gap-2 rounded bg-white p-4"
+        className="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="session-dialog-title"
       >
-        <h2 className="text-lg font-semibold">
-          {state.mode === 'create' ? 'New session' : 'Edit session'}
-        </h2>
-        <label className="text-sm">
-          Date
-          <input name="date" type="date" defaultValue={s?.date ?? state.date} required className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Type
-          <select name="activityType" defaultValue={s?.activityType ?? 'running'} className="block w-full rounded border px-2 py-1">
-            <option value="running">Running</option>
-            <option value="flag_football">Flag football</option>
-            <option value="other">Other</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          Session name
-          <input name="sessionName" defaultValue={s?.sessionName} required className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Priority
-          <select name="priority" defaultValue={s?.priority ?? 'essential'} className="block w-full rounded border px-2 py-1">
-            <option value="fixed">Fixed</option>
-            <option value="essential">Essential</option>
-            <option value="optional">Optional</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          Target duration (min)
-          <input name="targetDurationMin" type="number" defaultValue={s?.targetDurationMin ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Target distance (km)
-          <input name="targetDistanceKm" type="number" step="0.1" defaultValue={s?.targetDistanceKm ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Target D+ (m)
-          <input name="targetDplusM" type="number" defaultValue={s?.targetDplusM ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Intensity
-          <input name="intensity" defaultValue={s?.intensity ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Instructions
-          <textarea name="instructions" defaultValue={s?.instructions ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        <div className="mt-2 flex justify-between">
-          {state.mode === 'edit' ? (
-            <button type="button" onClick={handleDelete} disabled={isPending} className="text-sm text-red-600">
-              Delete
-            </button>
-          ) : (
-            <span />
-          )}
-          <div className="flex gap-2">
-            <button type="button" onClick={onClose} className="rounded border px-3 py-1 text-sm">
-              Cancel
-            </button>
-            <button type="submit" disabled={isPending} className="rounded bg-black px-3 py-1 text-sm text-white">
-              Save
-            </button>
+        <div className="dialog-header">
+          <h2 id="session-dialog-title" className="dialog-title">{state.mode === 'create' ? 'Plan a session' : 'Edit session'}</h2>
+          <p className="dialog-subtitle">Set the intention now. You can always adjust it later.</p>
+        </div>
+        <div className="dialog-body">
+          <div className="form-grid">
+            <label className="field">Date<input name="date" type="date" defaultValue={s?.date ?? state.date} required className="control" /></label>
+            <label className="field">Activity type<select name="activityType" defaultValue={s?.activityType ?? 'running'} className="control"><option value="running">Running</option><option value="flag_football">Flag football</option><option value="other">Other</option></select></label>
+            <label className="field span-2">Session name<input name="sessionName" defaultValue={s?.sessionName} required className="control" placeholder="e.g. Easy recovery run" /></label>
+            <label className="field">Priority<select name="priority" defaultValue={s?.priority ?? 'essential'} className="control"><option value="fixed">Fixed</option><option value="essential">Essential</option><option value="optional">Optional</option></select></label>
+            <label className="field">Intensity<input name="intensity" defaultValue={s?.intensity ?? ''} className="control" placeholder="e.g. Easy, Z2" /></label>
+            <label className="field">Duration <span className="table-muted">minutes</span><input name="targetDurationMin" type="number" defaultValue={s?.targetDurationMin ?? ''} className="control" /></label>
+            <label className="field">Distance <span className="table-muted">kilometres</span><input name="targetDistanceKm" type="number" step="0.1" defaultValue={s?.targetDistanceKm ?? ''} className="control" /></label>
+            <label className="field">Elevation gain <span className="table-muted">metres</span><input name="targetDplusM" type="number" defaultValue={s?.targetDplusM ?? ''} className="control" /></label>
+            <label className="field span-2">Session notes<textarea name="instructions" defaultValue={s?.instructions ?? ''} rows={3} className="control" placeholder="Route, intervals, pacing or anything to remember…" /></label>
+          </div>
+          <div className="dialog-actions">
+            {state.mode === 'edit' && <button type="button" onClick={handleDelete} disabled={isPending} className="button button-danger">Delete session</button>}
+            <div className="dialog-actions-right">
+              <button type="button" onClick={onClose} className="button">Cancel</button>
+              <button type="submit" disabled={isPending} className="button button-primary">{isPending ? 'Saving…' : 'Save session'}</button>
+            </div>
           </div>
         </div>
       </form>

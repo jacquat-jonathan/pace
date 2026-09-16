@@ -56,19 +56,38 @@ export function CalendarClient({ initialSessions }: { initialSessions: PlannedSe
     if (range) refetch(range.start, range.end)
   }, [range, refetch])
 
+  const distance = sessions.reduce((sum, session) => sum + (session.targetDistanceKm ?? 0), 0)
+  const elevation = sessions.reduce((sum, session) => sum + (session.targetDplusM ?? 0), 0)
+  const completed = sessions.filter((session) => session.status === 'done').length
+
   return (
     <>
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={mapSessionsToEvents(sessions)}
-        datesSet={handleDatesSet}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        eventDrop={handleEventDrop}
-        editable
-        height="auto"
-      />
+      <div className="stat-grid">
+        <div className="stat-card"><span className="stat-label">Sessions</span><span className="stat-value">{sessions.length}</span></div>
+        <div className="stat-card"><span className="stat-label">Planned distance</span><span className="stat-value">{Math.round(distance * 10) / 10}</span><span className="stat-unit">km</span></div>
+        <div className="stat-card"><span className="stat-label">Elevation gain</span><span className="stat-value">{elevation.toLocaleString()}</span><span className="stat-unit">m</span></div>
+        <div className="stat-card"><span className="stat-label">Completed</span><span className="stat-value">{completed}</span><span className="stat-unit">sessions</span></div>
+      </div>
+      <div className="card calendar-card">
+        <div className="calendar-legend" aria-label="Session priority legend">
+          <span className="legend-item"><span className="legend-dot" style={{ background: '#ed6946' }} />Essential</span>
+          <span className="legend-item"><span className="legend-dot" style={{ background: '#406989' }} />Fixed</span>
+          <span className="legend-item"><span className="legend-dot" style={{ background: '#9eaaa7' }} />Optional</span>
+          <span className="legend-item">Click a day to add · Drag to reschedule</span>
+        </div>
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={mapSessionsToEvents(sessions)}
+          datesSet={handleDatesSet}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          eventDrop={handleEventDrop}
+          editable
+          height="auto"
+          buttonText={{ today: 'Today' }}
+        />
+      </div>
       {dialog && <SessionDialog state={dialog} onClose={() => setDialog(null)} onSaved={handleSaved} />}
     </>
   )

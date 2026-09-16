@@ -10,9 +10,9 @@ export interface CalendarEvent {
 }
 
 const PRIORITY_COLOR: Record<PlannedSession['priority'], string> = {
-  fixed: '#6b7280',
-  essential: '#2563eb',
-  optional: '#93c5fd',
+  fixed: '#406989',
+  essential: '#ed6946',
+  optional: '#9eaaa7',
 }
 
 export function mapSessionsToEvents(sessions: PlannedSession[]): CalendarEvent[] {

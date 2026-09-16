@@ -12,8 +12,14 @@ export default async function CalendarPage() {
   const sessions = await listSessionsInRange(supabase, start, end)
 
   return (
-    <div>
-      <h1 className="mb-4 text-xl font-semibold">Calendar</h1>
+    <div className="page">
+      <header className="page-header">
+        <div>
+          <p className="eyebrow">Training schedule</p>
+          <h1 className="page-title">Your calendar</h1>
+          <p className="page-description">Plan the work, move sessions when life happens, and keep the bigger picture in sight.</p>
+        </div>
+      </header>
       <CalendarClient initialSessions={sessions} />
     </div>
   )

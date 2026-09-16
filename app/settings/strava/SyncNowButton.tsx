@@ -19,16 +19,16 @@ export function SyncNowButton() {
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col items-start gap-2">
       <button
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="w-fit rounded border px-3 py-1 text-sm"
+        className="button button-primary"
       >
         {isPending ? 'Syncing…' : 'Sync now'}
       </button>
-      {message && <p className="text-xs text-gray-500">{message}</p>}
+      {message && <p className="m-0 text-xs text-[#697379]">{message}</p>}
     </div>
   )
 }

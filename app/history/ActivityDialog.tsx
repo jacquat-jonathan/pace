@@ -92,77 +92,40 @@ export function ActivityDialog({
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <form action={handleSubmit} onClick={(e) => e.stopPropagation()} className="flex w-96 flex-col gap-2 rounded bg-white p-4">
-        <h2 className="text-lg font-semibold">{state.mode === 'create' ? 'Add activity' : 'Edit activity'}</h2>
-        <label className="text-sm">
-          Date
-          <input name="date" type="date" defaultValue={a?.date} disabled={readOnly} required className="block w-full rounded border px-2 py-1 disabled:bg-gray-100" />
-        </label>
-        <label className="text-sm">
-          Sport
-          <input name="sportType" defaultValue={a?.sportType} disabled={readOnly} required className="block w-full rounded border px-2 py-1 disabled:bg-gray-100" />
-        </label>
-        <label className="text-sm">
-          Duration (min)
-          <input name="durationMin" type="number" defaultValue={a?.durationMin ?? ''} disabled={readOnly} className="block w-full rounded border px-2 py-1 disabled:bg-gray-100" />
-        </label>
-        <label className="text-sm">
-          Distance (km)
-          <input name="distanceKm" type="number" step="0.1" defaultValue={a?.distanceKm ?? ''} disabled={readOnly} className="block w-full rounded border px-2 py-1 disabled:bg-gray-100" />
-        </label>
-        <label className="text-sm">
-          D+ (m)
-          <input name="dplusM" type="number" defaultValue={a?.dplusM ?? ''} disabled={readOnly} className="block w-full rounded border px-2 py-1 disabled:bg-gray-100" />
-        </label>
-        <label className="text-sm">
-          Avg HR
-          <input name="avgHr" type="number" defaultValue={a?.avgHr ?? ''} disabled={readOnly} className="block w-full rounded border px-2 py-1 disabled:bg-gray-100" />
-        </label>
-        <label className="text-sm">
-          RPE (1-10)
-          <input name="rpe" type="number" min={1} max={10} defaultValue={a?.rpe ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        <label className="text-sm">
-          Notes
-          <textarea name="notes" defaultValue={a?.notes ?? ''} className="block w-full rounded border px-2 py-1" />
-        </label>
-        {readOnly && (
-          <p className="text-xs text-gray-500">Core metrics come from Strava and can&apos;t be edited here.</p>
-        )}
+    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+      <form action={handleSubmit} onClick={(e) => e.stopPropagation()} className="dialog" role="dialog" aria-modal="true" aria-labelledby="activity-dialog-title">
+        <div className="dialog-header">
+          <h2 id="activity-dialog-title" className="dialog-title">{state.mode === 'create' ? 'Log an activity' : 'Activity details'}</h2>
+          <p className="dialog-subtitle">Record the work and how it felt.</p>
+        </div>
+        <div className="dialog-body">
+        <div className="form-grid">
+          <label className="field">Date<input name="date" type="date" defaultValue={a?.date} disabled={readOnly} required className="control" /></label>
+          <label className="field">Sport<input name="sportType" defaultValue={a?.sportType} disabled={readOnly} required className="control" placeholder="e.g. Run" /></label>
+          <label className="field">Duration <span className="table-muted">minutes</span><input name="durationMin" type="number" defaultValue={a?.durationMin ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Distance <span className="table-muted">kilometres</span><input name="distanceKm" type="number" step="0.1" defaultValue={a?.distanceKm ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Elevation gain <span className="table-muted">metres</span><input name="dplusM" type="number" defaultValue={a?.dplusM ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Average heart rate<input name="avgHr" type="number" defaultValue={a?.avgHr ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Perceived effort <span className="table-muted">1–10</span><input name="rpe" type="number" min={1} max={10} defaultValue={a?.rpe ?? ''} className="control" /></label>
+          <label className="field span-2">Notes<textarea name="notes" defaultValue={a?.notes ?? ''} rows={3} className="control" placeholder="How did the session feel?" /></label>
+        </div>
+        {readOnly && <p className="mt-3 text-xs text-gray-500">Imported metrics are managed by Strava. Effort and notes stay editable here.</p>}
         {state.mode === 'edit' && a && (
-          <div className="rounded border p-2 text-sm">
+          <div className="mt-4 rounded-xl border border-[#dddcd5] bg-[#f9f8f4] p-3 text-sm">
             {a.plannedSessionId ? (
-              <button type="button" onClick={handleUnlink} disabled={isPending} className="text-red-600">
-                Unlink from planned session
-              </button>
+              <div className="flex items-center justify-between gap-3"><span className="badge badge-linked">Linked to plan</span><button type="button" onClick={handleUnlink} disabled={isPending} className="text-link">Unlink</button></div>
             ) : nearbySessions.length > 0 ? (
-              <div className="flex flex-col gap-1">
-                <span>Link to a planned session:</span>
+              <div className="flex flex-col gap-2"><span className="font-semibold">Link to a planned session</span>
                 {nearbySessions.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => handleLink(s.id)}
-                    disabled={isPending}
-                    className="text-left text-blue-600 hover:underline"
-                  >
-                    {s.date} — {s.sessionName}
-                  </button>
+                  <button key={s.id} type="button" onClick={() => handleLink(s.id)} disabled={isPending} className="text-link text-left">{s.date} — {s.sessionName}</button>
                 ))}
               </div>
             ) : (
-              <span className="text-gray-500">No nearby planned sessions to link.</span>
+              <span className="table-muted">No nearby planned sessions to link.</span>
             )}
           </div>
         )}
-        <div className="mt-2 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded border px-3 py-1 text-sm">
-            Cancel
-          </button>
-          <button type="submit" disabled={isPending} className="rounded bg-black px-3 py-1 text-sm text-white">
-            Save
-          </button>
+        <div className="dialog-actions"><div className="dialog-actions-right"><button type="button" onClick={onClose} className="button">Cancel</button><button type="submit" disabled={isPending} className="button button-primary">{isPending ? 'Saving…' : 'Save activity'}</button></div></div>
         </div>
       </form>
     </div>
