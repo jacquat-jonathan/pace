@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import type { ActivityType, SessionPriority, PlannedSession } from '@/lib/types'
+import type { ActivityType, ActivityTypeOption, SessionPriority, SessionStatus, PlannedSession } from '@/lib/types'
 import { saveSession, removeSession } from './actions'
 
 export interface SessionDialogState {
@@ -20,13 +20,18 @@ export function SessionDialog({
   state,
   onClose,
   onSaved,
+  activityTypes,
 }: {
   state: SessionDialogState
   onClose: () => void
   onSaved: () => void
+  activityTypes: ActivityTypeOption[]
 }) {
   const [isPending, startTransition] = useTransition()
   const s = state.session
+  const availableActivityTypes = s && !activityTypes.some((type) => type.value === s.activityType)
+    ? [...activityTypes, { value: s.activityType, label: s.activityType.replaceAll('_', ' '), builtIn: false }]
+    : activityTypes
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -37,6 +42,7 @@ export function SessionDialog({
         activityType: formData.get('activityType') as ActivityType,
         sessionName: formData.get('sessionName') as string,
         priority: formData.get('priority') as SessionPriority,
+        status: s?.linkedActivityId ? 'done' : formData.get('status') as SessionStatus,
         targetDurationMin: numberOrNull(formData.get('targetDurationMin')),
         targetDistanceKm: numberOrNull(formData.get('targetDistanceKm')),
         targetDplusM: numberOrNull(formData.get('targetDplusM')),
@@ -71,8 +77,30 @@ export function SessionDialog({
         </div>
         <div className="dialog-body">
           <div className="form-grid">
+            <fieldset className="span-2">
+              <legend className="field-label">Session status</legend>
+              <div className="status-options">
+                {([
+                  ['todo', 'Planned', 'Upcoming or still to do'],
+                  ['done', 'Completed', 'Finished without Strava'],
+                  ['skipped', 'Skipped', 'Not completed'],
+                ] as const).map(([value, label, description]) => (
+                  <label className="status-option" key={value}>
+                    <input
+                      type="radio"
+                      name="status"
+                      value={value}
+                      defaultChecked={(s?.status ?? 'todo') === value}
+                      disabled={Boolean(s?.linkedActivityId)}
+                    />
+                    <span><strong>{label}</strong><small>{description}</small></span>
+                  </label>
+                ))}
+              </div>
+              {s?.linkedActivityId && <p className="field-hint">This session is completed because it is linked to an activity.</p>}
+            </fieldset>
             <label className="field">Date<input name="date" type="date" defaultValue={s?.date ?? state.date} required className="control" /></label>
-            <label className="field">Activity type<select name="activityType" defaultValue={s?.activityType ?? 'running'} className="control"><option value="running">Running</option><option value="flag_football">Flag football</option><option value="other">Other</option></select></label>
+            <label className="field">Activity type<select name="activityType" defaultValue={s?.activityType ?? 'running'} className="control">{availableActivityTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}</select></label>
             <label className="field span-2">Session name<input name="sessionName" defaultValue={s?.sessionName} required className="control" placeholder="e.g. Easy recovery run" /></label>
             <label className="field">Priority<select name="priority" defaultValue={s?.priority ?? 'essential'} className="control"><option value="fixed">Fixed</option><option value="essential">Essential</option><option value="optional">Optional</option></select></label>
             <label className="field">Intensity<input name="intensity" defaultValue={s?.intensity ?? ''} className="control" placeholder="e.g. Easy, Z2" /></label>

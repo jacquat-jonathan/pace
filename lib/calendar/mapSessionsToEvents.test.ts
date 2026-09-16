@@ -18,7 +18,16 @@ describe('mapSessionsToEvents', () => {
 
   it('appends a checkmark for done sessions', () => {
     const [event] = mapSessionsToEvents([{ ...session, status: 'done' }])
-    expect(event.title).toBe('Easy run ✓')
+    expect(event.title).toBe('✓ Easy run')
+    expect(event.classNames).toContain('session-done')
+    expect(event.backgroundColor).toBe('#34775b')
+  })
+
+  it('makes skipped sessions visibly distinct', () => {
+    const [event] = mapSessionsToEvents([{ ...session, status: 'skipped' }])
+    expect(event.title).toBe('– Easy run')
+    expect(event.classNames).toContain('session-skipped')
+    expect(event.textColor).not.toBe('#ffffff')
   })
 
   it('colors by priority', () => {

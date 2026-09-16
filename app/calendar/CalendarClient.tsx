@@ -6,12 +6,12 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import type { DateClickArg } from '@fullcalendar/interaction'
 import type { DatesSetArg, EventClickArg, EventDropArg } from '@fullcalendar/core'
-import type { PlannedSession } from '@/lib/types'
+import type { ActivityTypeOption, PlannedSession } from '@/lib/types'
 import { mapSessionsToEvents } from '@/lib/calendar/mapSessionsToEvents'
 import { getSessionsForRange, moveSession } from './actions'
 import { SessionDialog, type SessionDialogState } from './SessionDialog'
 
-export function CalendarClient({ initialSessions }: { initialSessions: PlannedSession[] }) {
+export function CalendarClient({ initialSessions, activityTypes }: { initialSessions: PlannedSession[]; activityTypes: ActivityTypeOption[] }) {
   const [sessions, setSessions] = useState(initialSessions)
   const [range, setRange] = useState<{ start: string; end: string } | null>(null)
   const [dialog, setDialog] = useState<SessionDialogState | null>(null)
@@ -69,7 +69,9 @@ export function CalendarClient({ initialSessions }: { initialSessions: PlannedSe
         <div className="stat-card"><span className="stat-label">Completed</span><span className="stat-value">{completed}</span><span className="stat-unit">sessions</span></div>
       </div>
       <div className="card calendar-card">
-        <div className="calendar-legend" aria-label="Session priority legend">
+        <div className="calendar-legend" aria-label="Session status and priority legend">
+          <span className="legend-item"><span className="legend-dot" style={{ background: '#34775b' }} />Completed</span>
+          <span className="legend-item"><span className="legend-dot" style={{ background: '#e3e4df' }} />Skipped</span>
           <span className="legend-item"><span className="legend-dot" style={{ background: '#ed6946' }} />Essential</span>
           <span className="legend-item"><span className="legend-dot" style={{ background: '#406989' }} />Fixed</span>
           <span className="legend-item"><span className="legend-dot" style={{ background: '#9eaaa7' }} />Optional</span>
@@ -88,7 +90,7 @@ export function CalendarClient({ initialSessions }: { initialSessions: PlannedSe
           buttonText={{ today: 'Today' }}
         />
       </div>
-      {dialog && <SessionDialog state={dialog} onClose={() => setDialog(null)} onSaved={handleSaved} />}
+      {dialog && <SessionDialog state={dialog} activityTypes={activityTypes} onClose={() => setDialog(null)} onSaved={handleSaved} />}
     </>
   )
 }

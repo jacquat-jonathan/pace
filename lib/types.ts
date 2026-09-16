@@ -1,8 +1,22 @@
 export type PlanStatus = 'active' | 'archived'
-export type ActivityType = 'running' | 'flag_football' | 'other'
+export type ActivityType = string
 export type SessionPriority = 'fixed' | 'essential' | 'optional'
 export type SessionStatus = 'todo' | 'done' | 'skipped'
 export type ActivitySource = 'strava' | 'manual'
+
+export interface ActivityTypeOption {
+  value: string
+  label: string
+  builtIn: boolean
+}
+
+export interface CustomActivityType {
+  id: string
+  userId: string
+  value: string
+  label: string
+  createdAt: string
+}
 
 export interface Plan {
   id: string

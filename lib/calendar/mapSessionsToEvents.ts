@@ -6,6 +6,8 @@ export interface CalendarEvent {
   start: string
   allDay: true
   backgroundColor: string
+  textColor: string
+  classNames: string[]
   extendedProps: { sessionId: string; status: PlannedSession['status'] }
 }
 
@@ -16,12 +18,26 @@ const PRIORITY_COLOR: Record<PlannedSession['priority'], string> = {
 }
 
 export function mapSessionsToEvents(sessions: PlannedSession[]): CalendarEvent[] {
-  return sessions.map((s) => ({
-    id: s.id,
-    title: s.status === 'done' ? `${s.sessionName} ✓` : s.sessionName,
-    start: s.date,
-    allDay: true,
-    backgroundColor: PRIORITY_COLOR[s.priority],
-    extendedProps: { sessionId: s.id, status: s.status },
-  }))
+  return sessions.map((s) => {
+    const title = s.status === 'done'
+      ? `✓ ${s.sessionName}`
+      : s.status === 'skipped'
+        ? `– ${s.sessionName}`
+        : s.sessionName
+
+    return {
+      id: s.id,
+      title,
+      start: s.date,
+      allDay: true,
+      backgroundColor: s.status === 'done'
+        ? '#34775b'
+        : s.status === 'skipped'
+          ? '#e3e4df'
+          : PRIORITY_COLOR[s.priority],
+      textColor: s.status === 'skipped' ? '#697379' : '#ffffff',
+      classNames: [`session-${s.status}`],
+      extendedProps: { sessionId: s.id, status: s.status },
+    }
+  })
 }

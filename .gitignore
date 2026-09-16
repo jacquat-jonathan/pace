@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# supabase CLI local link state (contains project ref / pooler connection info)
+supabase/.temp
+
 # next.js
 /.next/
 /out/

@@ -75,7 +75,7 @@ export async function syncActivities(supabase: any, userId: string): Promise<Syn
     if (!saved.plannedSessionId) {
       const activityType = mapStravaTypeToActivityType(activity.sport_type)
       const candidates = (await listSessionsInRange(supabase, date, date)).filter(
-        (s) => s.status !== 'done' && s.activityType === activityType,
+        (s) => s.status !== 'skipped' && !s.linkedActivityId && s.activityType === activityType,
       )
       // Auto-link only on an unambiguous match. Zero candidates or several
       // same-day/same-type candidates are both left unlinked for the user to
