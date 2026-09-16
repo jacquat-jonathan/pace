@@ -102,11 +102,11 @@ export function ActivityDialog({
         <div className="form-grid">
           <label className="field">Date<input name="date" type="date" defaultValue={a?.date} disabled={readOnly} required className="control" /></label>
           <label className="field">Sport<input name="sportType" defaultValue={a?.sportType} disabled={readOnly} required className="control" placeholder="e.g. Run" /></label>
-          <label className="field">Duration <span className="table-muted">minutes</span><input name="durationMin" type="number" defaultValue={a?.durationMin ?? ''} disabled={readOnly} className="control" /></label>
-          <label className="field">Distance <span className="table-muted">kilometres</span><input name="distanceKm" type="number" step="0.1" defaultValue={a?.distanceKm ?? ''} disabled={readOnly} className="control" /></label>
-          <label className="field">Elevation gain <span className="table-muted">metres</span><input name="dplusM" type="number" defaultValue={a?.dplusM ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Duration (minutes)<input name="durationMin" type="number" defaultValue={a?.durationMin ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Distance (kilometres)<input name="distanceKm" type="number" step="0.1" defaultValue={a?.distanceKm ?? ''} disabled={readOnly} className="control" /></label>
+          <label className="field">Elevation gain (metres)<input name="dplusM" type="number" defaultValue={a?.dplusM ?? ''} disabled={readOnly} className="control" /></label>
           <label className="field">Average heart rate<input name="avgHr" type="number" defaultValue={a?.avgHr ?? ''} disabled={readOnly} className="control" /></label>
-          <label className="field">Perceived effort <span className="table-muted">1–10</span><input name="rpe" type="number" min={1} max={10} defaultValue={a?.rpe ?? ''} className="control" /></label>
+          <label className="field">Perceived effort (1–10)<input name="rpe" type="number" min={1} max={10} defaultValue={a?.rpe ?? ''} className="control" /></label>
           <label className="field span-2">Notes<textarea name="notes" defaultValue={a?.notes ?? ''} rows={3} className="control" placeholder="How did the session feel?" /></label>
         </div>
         {readOnly && <p className="mt-3 text-xs text-gray-500">Imported metrics are managed by Strava. Effort and notes stay editable here.</p>}

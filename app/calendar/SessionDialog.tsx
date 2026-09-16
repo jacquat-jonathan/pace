@@ -76,9 +76,9 @@ export function SessionDialog({
             <label className="field span-2">Session name<input name="sessionName" defaultValue={s?.sessionName} required className="control" placeholder="e.g. Easy recovery run" /></label>
             <label className="field">Priority<select name="priority" defaultValue={s?.priority ?? 'essential'} className="control"><option value="fixed">Fixed</option><option value="essential">Essential</option><option value="optional">Optional</option></select></label>
             <label className="field">Intensity<input name="intensity" defaultValue={s?.intensity ?? ''} className="control" placeholder="e.g. Easy, Z2" /></label>
-            <label className="field">Duration <span className="table-muted">minutes</span><input name="targetDurationMin" type="number" defaultValue={s?.targetDurationMin ?? ''} className="control" /></label>
-            <label className="field">Distance <span className="table-muted">kilometres</span><input name="targetDistanceKm" type="number" step="0.1" defaultValue={s?.targetDistanceKm ?? ''} className="control" /></label>
-            <label className="field">Elevation gain <span className="table-muted">metres</span><input name="targetDplusM" type="number" defaultValue={s?.targetDplusM ?? ''} className="control" /></label>
+            <label className="field">Duration (minutes)<input name="targetDurationMin" type="number" defaultValue={s?.targetDurationMin ?? ''} className="control" /></label>
+            <label className="field">Distance (kilometres)<input name="targetDistanceKm" type="number" step="0.1" defaultValue={s?.targetDistanceKm ?? ''} className="control" /></label>
+            <label className="field">Elevation gain (metres)<input name="targetDplusM" type="number" defaultValue={s?.targetDplusM ?? ''} className="control" /></label>
             <label className="field span-2">Session notes<textarea name="instructions" defaultValue={s?.instructions ?? ''} rows={3} className="control" placeholder="Route, intervals, pacing or anything to remember…" /></label>
           </div>
           <div className="dialog-actions">
