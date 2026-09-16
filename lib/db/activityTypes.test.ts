@@ -4,7 +4,9 @@ import {
   activityTypeValue,
   createCustomActivityType,
   deleteCustomActivityType,
+  listActivityTypeIcons,
   listCustomActivityTypes,
+  setActivityTypeIcon,
   toActivityTypeOptions,
 } from './activityTypes'
 
@@ -29,5 +31,14 @@ describe('activity types', () => {
       { id: '1', userId: 'u1', value: 'cycling', label: 'Cycling', createdAt: '2026-09-17' },
     ])
     expect(options.map((option) => option.value)).toEqual(['running', 'flag_football', 'cycling'])
+  })
+
+  it('stores an icon preference and adds it to activity options', async () => {
+    const supabase = createFakeSupabase()
+    await setActivityTypeIcon(supabase, 'running', '👟')
+    const icons = await listActivityTypeIcons(supabase)
+    const options = toActivityTypeOptions([], icons)
+
+    expect(options.find((option) => option.value === 'running')?.icon).toBe('👟')
   })
 })

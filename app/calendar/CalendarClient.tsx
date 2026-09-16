@@ -59,6 +59,7 @@ export function CalendarClient({ initialSessions, activityTypes }: { initialSess
   const distance = sessions.reduce((sum, session) => sum + (session.targetDistanceKm ?? 0), 0)
   const elevation = sessions.reduce((sum, session) => sum + (session.targetDplusM ?? 0), 0)
   const completed = sessions.filter((session) => session.status === 'done').length
+  const activityIcons = Object.fromEntries(activityTypes.map((type) => [type.value, type.icon]))
 
   return (
     <>
@@ -80,7 +81,25 @@ export function CalendarClient({ initialSessions, activityTypes }: { initialSess
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
-          events={mapSessionsToEvents(sessions)}
+          firstDay={1}
+          fixedWeekCount={false}
+          events={mapSessionsToEvents(sessions, activityIcons)}
+          eventContent={(arg) => (
+            <div className="calendar-event-content">
+              {arg.event.extendedProps.status !== 'todo' && (
+                <span
+                  className={`calendar-status-marker calendar-status-${arg.event.extendedProps.status}`}
+                  aria-hidden="true"
+                >
+                  {arg.event.extendedProps.status === 'done' ? '✓' : '×'}
+                </span>
+              )}
+              <span className="calendar-event-title">{arg.event.extendedProps.sessionName}</span>
+              {arg.event.extendedProps.icon && (
+                <span className="calendar-event-icon" aria-hidden="true">{arg.event.extendedProps.icon}</span>
+              )}
+            </div>
+          )}
           datesSet={handleDatesSet}
           dateClick={handleDateClick}
           eventClick={handleEventClick}

@@ -30,7 +30,7 @@ export function SessionDialog({
   const [isPending, startTransition] = useTransition()
   const s = state.session
   const availableActivityTypes = s && !activityTypes.some((type) => type.value === s.activityType)
-    ? [...activityTypes, { value: s.activityType, label: s.activityType.replaceAll('_', ' '), builtIn: false }]
+    ? [...activityTypes, { value: s.activityType, label: s.activityType.replaceAll('_', ' '), builtIn: false, icon: '🏅' }]
     : activityTypes
 
   function handleSubmit(formData: FormData) {
@@ -100,7 +100,7 @@ export function SessionDialog({
               {s?.linkedActivityId && <p className="field-hint">This session is completed because it is linked to an activity.</p>}
             </fieldset>
             <label className="field">Date<input name="date" type="date" defaultValue={s?.date ?? state.date} required className="control" /></label>
-            <label className="field">Activity type<select name="activityType" defaultValue={s?.activityType ?? 'running'} className="control">{availableActivityTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}</select></label>
+            <label className="field">Activity type<select name="activityType" defaultValue={s?.activityType ?? 'running'} className="control">{availableActivityTypes.map((type) => <option key={type.value} value={type.value}>{type.icon} {type.label}</option>)}</select></label>
             <label className="field span-2">Session name<input name="sessionName" defaultValue={s?.sessionName} required className="control" placeholder="e.g. Easy recovery run" /></label>
             <label className="field">Priority<select name="priority" defaultValue={s?.priority ?? 'essential'} className="control"><option value="fixed">Fixed</option><option value="essential">Essential</option><option value="optional">Optional</option></select></label>
             <label className="field">Intensity<input name="intensity" defaultValue={s?.intensity ?? ''} className="control" placeholder="e.g. Easy, Z2" /></label>

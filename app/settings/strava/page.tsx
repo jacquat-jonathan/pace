@@ -3,20 +3,26 @@ import { getStravaTokens } from '@/lib/db/stravaTokens'
 import { disconnectStrava } from './actions'
 import { SyncNowButton } from './SyncNowButton'
 import { ActivityTypeManager } from './ActivityTypeManager'
-import { BUILTIN_ACTIVITY_TYPES, listCustomActivityTypes } from '@/lib/db/activityTypes'
+import { listActivityTypeIcons, listCustomActivityTypes, toActivityTypeOptions } from '@/lib/db/activityTypes'
 
 export default async function StravaSettingsPage() {
   const supabase = await createServerSupabase()
-  const [tokens, customActivityTypes] = await Promise.all([
+  const [tokens, customActivityTypes, activityTypeIcons] = await Promise.all([
     getStravaTokens(supabase),
     listCustomActivityTypes(supabase),
+    listActivityTypeIcons(supabase),
   ])
+  const activityTypes = toActivityTypeOptions(customActivityTypes, activityTypeIcons)
 
   return (
     <div className="page page-narrow">
       <header className="page-header"><div><p className="eyebrow">Preferences</p><h1 className="page-title">Settings</h1><p className="page-description">Manage the activities you train for and how completed sessions are imported.</p></div></header>
       <div className="section-stack max-w-2xl">
-      <ActivityTypeManager builtInTypes={BUILTIN_ACTIVITY_TYPES} initialCustomTypes={customActivityTypes} />
+      <ActivityTypeManager
+        builtInTypes={activityTypes.filter((type) => type.builtIn)}
+        initialCustomTypes={customActivityTypes}
+        initialIcons={Object.fromEntries(activityTypes.map((type) => [type.value, type.icon]))}
+      />
       <div className="card">
       <div className="card-header"><div><h2 className="card-title">Strava connection</h2><p className="card-kicker">Import and match completed activities</p></div></div>
       <div className="card-body">

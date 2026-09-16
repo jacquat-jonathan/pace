@@ -35,4 +35,14 @@ describe('mapSessionsToEvents', () => {
     const [optionalEvent] = mapSessionsToEvents([{ ...session, priority: 'optional' }])
     expect(fixedEvent.backgroundColor).not.toBe(optionalEvent.backgroundColor)
   })
+
+  it('shows the configured activity icon in the event title', () => {
+    const [event] = mapSessionsToEvents([session], { running: '🏃' })
+    expect(event.title).toBe('Easy run')
+    expect(event.extendedProps.icon).toBe('🏃')
+
+    const [doneEvent] = mapSessionsToEvents([{ ...session, status: 'done' }], { running: '🏃' })
+    expect(doneEvent.title).toBe('✓ Easy run')
+    expect(doneEvent.extendedProps.icon).toBe('🏃')
+  })
 })

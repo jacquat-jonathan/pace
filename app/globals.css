@@ -108,9 +108,11 @@ textarea.control { resize: vertical; line-height: 1.5; }
 .activity-type-list { display: flex; flex-direction: column; }
 .activity-type-row { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #e9e8e2; }
 .activity-type-row:first-child { border-top: 1px solid #e9e8e2; }
-.activity-type-row > span:first-child { display: flex; flex-direction: column; }
+.activity-type-meta { display: flex; min-width: 130px; flex: 1; flex-direction: column; }
 .activity-type-row strong { font-size: 13px; font-weight: 650; }
 .activity-type-row small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+.activity-icon-controls { display: flex; align-items: center; gap: 8px; }
+.activity-icon-input { width: 62px; min-width: 62px; text-align: center; font-size: 20px; }
 .activity-type-form { display: flex; align-items: flex-end; gap: 10px; margin-top: 20px; }
 
 .badge { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 0 8px; border-radius: 999px; background: #efefeb; color: #586266; font-size: 11px; font-weight: 650; text-transform: capitalize; white-space: nowrap; }
@@ -156,7 +158,15 @@ textarea.control { resize: vertical; line-height: 1.5; }
 .fc .fc-col-header-cell-cushion { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-decoration: none; text-transform: uppercase; }
 .fc .fc-daygrid-day-number { padding: 8px 9px; color: var(--ink); font-size: 12px; font-weight: 560; text-decoration: none; }
 .fc .fc-daygrid-day-frame { min-height: 105px; }
-.fc .fc-event { margin: 2px 4px; padding: 3px 5px; border: 0; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 620; }
+.fc .fc-event { min-height: 31px; margin: 3px 4px; padding: 5px 7px; border: 0; border-radius: 7px; cursor: pointer; font-size: 11px; font-weight: 620; }
+.fc .fc-event-main { display: flex; width: 100%; align-items: center; }
+.fc .fc-event-main-frame { width: 100%; }
+.calendar-event-content { display: flex; width: 100%; min-width: 0; min-height: 21px; align-items: center; justify-content: space-between; gap: 6px; line-height: 1; }
+.calendar-event-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.calendar-event-icon { flex: none; margin-left: auto; font-size: 14px; line-height: 1; }
+.calendar-status-marker { display: grid; width: 17px; height: 17px; flex: 0 0 17px; place-items: center; border-radius: 50%; font-size: 11px; font-weight: 800; line-height: 1; }
+.calendar-status-done { background: rgb(255 255 255 / 24%); color: white; }
+.calendar-status-skipped { border: 1px solid #a5aaa6; background: white; color: #697379; }
 .fc .fc-event.session-done { box-shadow: inset 3px 0 0 rgb(255 255 255 / 35%); }
 .fc .fc-event.session-skipped { text-decoration: line-through; }
 .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { display: grid; width: 27px; height: 27px; margin: 4px; place-items: center; padding: 0; border-radius: 50%; background: var(--accent); color: white; }
@@ -187,6 +197,8 @@ textarea.control { resize: vertical; line-height: 1.5; }
   .status-options { grid-template-columns: 1fr; }
   .status-option span { min-height: 54px; }
   .activity-type-form { align-items: stretch; flex-direction: column; }
+  .activity-type-row { align-items: flex-start; flex-wrap: wrap; padding: 10px 0; }
+  .activity-icon-controls { margin-left: auto; }
   .dialog-backdrop { align-items: end; padding: 10px; }
   .dialog { max-height: calc(100vh - 20px); border-radius: 20px 20px 14px 14px; }
   .dialog-header { padding: 20px 18px 15px; }
@@ -195,5 +207,6 @@ textarea.control { resize: vertical; line-height: 1.5; }
   .fc .fc-toolbar { align-items: flex-start; gap: 9px; }
   .fc .fc-toolbar-title { font-size: 17px; }
   .fc .fc-daygrid-day-frame { min-height: 73px; }
-  .fc .fc-event { overflow: hidden; padding: 2px 3px; font-size: 9px; }
+  .fc .fc-event { min-height: 26px; overflow: hidden; padding: 3px 4px; font-size: 9px; }
+  .calendar-event-icon { font-size: 12px; }
 }

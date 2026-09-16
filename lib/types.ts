@@ -8,6 +8,7 @@ export interface ActivityTypeOption {
   value: string
   label: string
   builtIn: boolean
+  icon: string
 }
 
 export interface CustomActivityType {

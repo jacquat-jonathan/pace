@@ -1,9 +1,11 @@
 import type { ActivityTypeOption, CustomActivityType } from '@/lib/types'
 
 export const BUILTIN_ACTIVITY_TYPES: ActivityTypeOption[] = [
-  { value: 'running', label: 'Running', builtIn: true },
-  { value: 'flag_football', label: 'Flag football', builtIn: true },
+  { value: 'running', label: 'Running', builtIn: true, icon: '🏃' },
+  { value: 'flag_football', label: 'Flag football', builtIn: true, icon: '🏈' },
 ]
+
+const DEFAULT_CUSTOM_ICON = '🏅'
 
 function mapActivityType(row: any): CustomActivityType {
   return {
@@ -61,9 +63,36 @@ export async function deleteCustomActivityType(supabase: any, id: string): Promi
   if (error) throw error
 }
 
-export function toActivityTypeOptions(customTypes: CustomActivityType[]): ActivityTypeOption[] {
+export async function listActivityTypeIcons(supabase: any): Promise<Record<string, string>> {
+  const { data, error } = await supabase.from('activity_type_icons').select('*')
+  if (error && (error.code === '42P01' || error.code === 'PGRST205' || error.message?.includes('activity_type_icons'))) {
+    return {}
+  }
+  if (error) throw error
+  return Object.fromEntries((data ?? []).map((row: any) => [row.activity_type, row.icon]))
+}
+
+export async function setActivityTypeIcon(supabase: any, activityType: string, icon: string): Promise<void> {
+  const cleanIcon = icon.trim()
+  if (!activityType.trim() || !cleanIcon) throw new Error('Choose an icon')
+  if (cleanIcon.length > 16) throw new Error('Use one emoji or a short symbol')
+  const { error } = await supabase
+    .from('activity_type_icons')
+    .upsert({ activity_type: activityType, icon: cleanIcon }, { onConflict: 'user_id,activity_type' })
+  if (error) throw error
+}
+
+export function toActivityTypeOptions(
+  customTypes: CustomActivityType[],
+  icons: Record<string, string> = {},
+): ActivityTypeOption[] {
   return [
-    ...BUILTIN_ACTIVITY_TYPES,
-    ...customTypes.map((type) => ({ value: type.value, label: type.label, builtIn: false })),
+    ...BUILTIN_ACTIVITY_TYPES.map((type) => ({ ...type, icon: icons[type.value] ?? type.icon })),
+    ...customTypes.map((type) => ({
+      value: type.value,
+      label: type.label,
+      builtIn: false,
+      icon: icons[type.value] ?? DEFAULT_CUSTOM_ICON,
+    })),
   ]
 }

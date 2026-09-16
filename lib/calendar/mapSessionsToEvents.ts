@@ -8,7 +8,7 @@ export interface CalendarEvent {
   backgroundColor: string
   textColor: string
   classNames: string[]
-  extendedProps: { sessionId: string; status: PlannedSession['status'] }
+  extendedProps: { sessionId: string; sessionName: string; status: PlannedSession['status']; icon?: string }
 }
 
 const PRIORITY_COLOR: Record<PlannedSession['priority'], string> = {
@@ -17,8 +17,12 @@ const PRIORITY_COLOR: Record<PlannedSession['priority'], string> = {
   optional: '#9eaaa7',
 }
 
-export function mapSessionsToEvents(sessions: PlannedSession[]): CalendarEvent[] {
+export function mapSessionsToEvents(
+  sessions: PlannedSession[],
+  activityIcons: Record<string, string> = {},
+): CalendarEvent[] {
   return sessions.map((s) => {
+    const icon = activityIcons[s.activityType]
     const title = s.status === 'done'
       ? `✓ ${s.sessionName}`
       : s.status === 'skipped'
@@ -37,7 +41,7 @@ export function mapSessionsToEvents(sessions: PlannedSession[]): CalendarEvent[]
           : PRIORITY_COLOR[s.priority],
       textColor: s.status === 'skipped' ? '#697379' : '#ffffff',
       classNames: [`session-${s.status}`],
-      extendedProps: { sessionId: s.id, status: s.status },
+      extendedProps: { sessionId: s.id, sessionName: s.sessionName, status: s.status, icon },
     }
   })
 }

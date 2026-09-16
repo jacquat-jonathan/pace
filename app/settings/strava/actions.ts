@@ -5,7 +5,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { deleteStravaTokens } from '@/lib/db/stravaTokens'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { syncActivities } from '@/lib/strava/sync'
-import { createCustomActivityType, deleteCustomActivityType } from '@/lib/db/activityTypes'
+import { createCustomActivityType, deleteCustomActivityType, setActivityTypeIcon } from '@/lib/db/activityTypes'
 
 async function authenticatedSupabase() {
   const supabase = await createServerSupabase()
@@ -14,13 +14,15 @@ async function authenticatedSupabase() {
   return supabase
 }
 
-export async function addActivityType(label: string) {
+export async function addActivityType(label: string, icon: string) {
   try {
     const supabase = await authenticatedSupabase()
     const activityType = await createCustomActivityType(supabase, label)
+    const savedIcon = icon.trim() || '🏅'
+    await setActivityTypeIcon(supabase, activityType.value, savedIcon)
     revalidatePath('/settings/strava')
     revalidatePath('/calendar')
-    return { ok: true as const, activityType }
+    return { ok: true as const, activityType, icon: savedIcon }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not add activity type'
     const error = message.includes('duplicate')
@@ -29,6 +31,24 @@ export async function addActivityType(label: string) {
         ? 'Apply database migration 0002_custom_activity_types.sql first'
         : message
     return { ok: false as const, error }
+  }
+}
+
+export async function updateActivityTypeIcon(activityType: string, icon: string) {
+  try {
+    const supabase = await authenticatedSupabase()
+    await setActivityTypeIcon(supabase, activityType, icon)
+    revalidatePath('/settings/strava')
+    revalidatePath('/calendar')
+    return { ok: true as const }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not save icon'
+    return {
+      ok: false as const,
+      error: message.includes('activity_type_icons')
+        ? 'Apply database migration 0004_activity_type_icons.sql first'
+        : message,
+    }
   }
 }
 
