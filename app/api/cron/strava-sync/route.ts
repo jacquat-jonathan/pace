@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { syncActivities } from '@/lib/strava/sync'
+import { errorMessage } from '@/lib/errors'
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -17,9 +18,6 @@ export async function GET(request: Request) {
     // in Vercel's Cron Jobs log rather than an unlogged crash, per the
     // spec's "surface, don't fail silently" error-handling requirement.
     console.error('Strava cron sync failed:', err)
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Unknown sync error' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: errorMessage(err, 'Unknown sync error') }, { status: 500 })
   }
 }

@@ -6,6 +6,7 @@ import { deleteStravaTokens } from '@/lib/db/stravaTokens'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { syncActivities } from '@/lib/strava/sync'
 import { createCustomActivityType, deleteCustomActivityType, setActivityTypeIcon } from '@/lib/db/activityTypes'
+import { errorMessage } from '@/lib/errors'
 
 async function authenticatedSupabase() {
   const supabase = await createServerSupabase()
@@ -24,7 +25,7 @@ export async function addActivityType(label: string, icon: string) {
     revalidatePath('/calendar')
     return { ok: true as const, activityType, icon: savedIcon }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Could not add activity type'
+    const message = errorMessage(err, 'Could not add activity type')
     const error = message.includes('duplicate')
       ? 'That activity type already exists'
       : message.includes('activity_types')
@@ -42,7 +43,7 @@ export async function updateActivityTypeIcon(activityType: string, icon: string)
     revalidatePath('/calendar')
     return { ok: true as const }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Could not save icon'
+    const message = errorMessage(err, 'Could not save icon')
     return {
       ok: false as const,
       error: message.includes('activity_type_icons')
@@ -60,7 +61,7 @@ export async function removeActivityType(id: string) {
     revalidatePath('/calendar')
     return { ok: true as const }
   } catch (err) {
-    return { ok: false as const, error: err instanceof Error ? err.message : 'Could not remove activity type' }
+    return { ok: false as const, error: errorMessage(err, 'Could not remove activity type') }
   }
 }
 
@@ -90,6 +91,10 @@ export async function syncNow(): Promise<
     revalidatePath('/calendar')
     return { ok: true, ...result }
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'Unknown sync error' }
+    // Supabase throws plain error objects, not Error instances, so without
+    // logging here a failed sync only ever surfaces as "Unknown sync error"
+    // in the UI with no way to see the real cause.
+    console.error('Strava sync failed:', err)
+    return { ok: false, error: errorMessage(err, 'Unknown sync error') }
   }
 }
