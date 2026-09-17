@@ -40,6 +40,10 @@ describe('syncActivities', () => {
     const result = await syncActivities(supabase, 'u1')
     expect(result).toEqual({ imported: 1, matched: 1 })
     expect(stravaClient.refreshAccessToken).not.toHaveBeenCalled()
+    // syncActivities always re-saves the token row at the end (to record
+    // last_synced_at), via the service-role client with no session — that
+    // save must carry user_id explicitly rather than relying on auth.uid().
+    expect(supabase._tables.strava_tokens[0].user_id).toBe('u1')
   })
 
   it('leaves an activity unmatched when no compatible session exists that day', async () => {

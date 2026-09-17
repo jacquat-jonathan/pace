@@ -88,6 +88,7 @@ export async function syncActivities(supabase: any, userId: string): Promise<Syn
   }
 
   await upsertStravaTokens(supabase, {
+    userId,
     accessToken,
     refreshToken,
     expiresAt: expiresAtIso,

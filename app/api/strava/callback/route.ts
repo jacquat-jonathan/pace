@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const tokens = await exchangeCodeForToken(code)
     const supabase = await createServerSupabase()
     await upsertStravaTokens(supabase, {
+      userId: process.env.SPORT_TRACKER_USER_ID!,
       athleteId: tokens.athleteId,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,

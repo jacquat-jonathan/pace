@@ -25,6 +25,7 @@ export async function getStravaTokens(supabase: any): Promise<StravaTokens | nul
 export async function upsertStravaTokens(
   supabase: any,
   tokens: {
+    userId: string
     athleteId?: number | null
     accessToken: string
     refreshToken: string
@@ -32,9 +33,18 @@ export async function upsertStravaTokens(
     lastSyncedAt?: string | null
   },
 ): Promise<StravaTokens> {
-  const { data: existing } = await supabase.from('strava_tokens').select('*').maybeSingle()
+  // `user_id` defaults to auth.uid() in the schema, which only resolves when
+  // the query runs under the owning user's session. The service-role client
+  // used by sync/cron has no session, so auth.uid() is null there — set it
+  // explicitly so this works from both the session and admin clients.
+  const { data: existing } = await supabase
+    .from('strava_tokens')
+    .select('*')
+    .eq('user_id', tokens.userId)
+    .maybeSingle()
   const row = {
     id: existing?.id,
+    user_id: tokens.userId,
     athlete_id: tokens.athleteId ?? existing?.athlete_id ?? null,
     access_token: tokens.accessToken,
     refresh_token: tokens.refreshToken,
