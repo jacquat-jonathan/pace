@@ -21,6 +21,12 @@ function mapActivity(row: any): Activity {
   }
 }
 
+export async function getActivityById(supabase: any, id: string): Promise<Activity | null> {
+  const { data, error } = await supabase.from('activities').select('*').eq('id', id).maybeSingle()
+  if (error) throw error
+  return data ? mapActivity(data) : null
+}
+
 export async function listActivities(
   supabase: any,
   opts: { limit?: number; before?: string } = {},

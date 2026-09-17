@@ -1,8 +1,8 @@
 'use client'
 
-import { useTransition } from 'react'
-import type { ActivityType, ActivityTypeOption, SessionPriority, SessionStatus, PlannedSession } from '@/lib/types'
-import { saveSession, removeSession } from './actions'
+import { useEffect, useState, useTransition } from 'react'
+import type { Activity, ActivityType, ActivityTypeOption, SessionPriority, SessionStatus, PlannedSession } from '@/lib/types'
+import { saveSession, removeSession, getLinkedActivity } from './actions'
 
 export interface SessionDialogState {
   mode: 'create' | 'edit'
@@ -32,6 +32,15 @@ export function SessionDialog({
   const availableActivityTypes = s && !activityTypes.some((type) => type.value === s.activityType)
     ? [...activityTypes, { value: s.activityType, label: s.activityType.replaceAll('_', ' '), builtIn: false, icon: '🏅' }]
     : activityTypes
+  const [linkedActivity, setLinkedActivity] = useState<Activity | null>(null)
+
+  useEffect(() => {
+    if (s?.linkedActivityId) {
+      getLinkedActivity(s.linkedActivityId).then(setLinkedActivity)
+    } else {
+      setLinkedActivity(null)
+    }
+  }, [s?.linkedActivityId])
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -97,7 +106,22 @@ export function SessionDialog({
                   </label>
                 ))}
               </div>
-              {s?.linkedActivityId && <p className="field-hint">This session is completed because it is linked to an activity.</p>}
+              {s?.linkedActivityId && (
+                <div className="field-hint">
+                  {linkedActivity ? (
+                    <span>
+                      Completed — linked to {linkedActivity.sportType} on {linkedActivity.date}
+                      {linkedActivity.distanceKm != null ? `, ${linkedActivity.distanceKm} km` : ''}
+                      {linkedActivity.durationMin != null ? `, ${linkedActivity.durationMin} min` : ''}
+                      {linkedActivity.stravaLink && (
+                        <> (<a href={linkedActivity.stravaLink} target="_blank" rel="noreferrer" className="text-link">view on Strava</a>)</>
+                      )}
+                    </span>
+                  ) : (
+                    <span>This session is completed because it is linked to an activity.</span>
+                  )}
+                </div>
+              )}
             </fieldset>
             <label className="field">Date<input name="date" type="date" defaultValue={s?.date ?? state.date} required className="control" /></label>
             <label className="field">Activity type<select name="activityType" defaultValue={s?.activityType ?? 'running'} className="control">{availableActivityTypes.map((type) => <option key={type.value} value={type.value}>{type.icon} {type.label}</option>)}</select></label>
