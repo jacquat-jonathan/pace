@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { exchangeCodeForToken } from '@/lib/strava/client'
 import { upsertStravaTokens } from '@/lib/db/stravaTokens'
 import { createServerSupabase } from '@/lib/supabase/server'
+import { appUrl } from '@/lib/url'
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -9,7 +10,7 @@ export async function GET(request: Request) {
   const error = url.searchParams.get('error')
 
   if (error || !code) {
-    return NextResponse.redirect(new URL('/settings/strava?error=denied', request.url))
+    return NextResponse.redirect(appUrl('/settings/strava?error=denied', request))
   }
 
   try {
@@ -23,8 +24,8 @@ export async function GET(request: Request) {
     })
   } catch (err) {
     console.error('Strava OAuth callback failed:', err)
-    return NextResponse.redirect(new URL('/settings/strava?error=exchange_failed', request.url))
+    return NextResponse.redirect(appUrl('/settings/strava?error=exchange_failed', request))
   }
 
-  return NextResponse.redirect(new URL('/settings/strava?connected=1', request.url))
+  return NextResponse.redirect(appUrl('/settings/strava?connected=1', request))
 }
